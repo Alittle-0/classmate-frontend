@@ -1,0 +1,136 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" version="29.2.1">
+  <diagram name="Page-1" id="URwpnsb867-b8Kgy-GKy">
+    <mxGraphModel dx="2847" dy="1289" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=22;fontStyle=1" value="School Management System - Microservices Architecture &amp; Design Patterns" vertex="1">
+          <mxGeometry height="40" width="800" x="250" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=10;" value="&lt;b&gt;System Design Patterns Applied:&lt;/b&gt;&lt;br&gt;1. API Gateway&lt;br&gt;2. Database per Service&lt;br&gt;3. Event-Driven (Async)&lt;br&gt;4. Circuit Breaker (Resilience)&lt;br&gt;5. DTO (Data Transfer Object)&lt;br&gt;6. Layered Architecture" vertex="1">
+          <mxGeometry height="110" width="220" x="40" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="client" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=middle;" value="&lt;b&gt;Frontend (ReactJS)&lt;/b&gt;&lt;br&gt;Local Storage: JWT&lt;br&gt;Auth Header: Bearer Token" vertex="1">
+          <mxGeometry height="70" width="220" x="500" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="gateway" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;verticalAlign=top;" value="&lt;b&gt;API Gateway&lt;/b&gt;&lt;br&gt;(Spring Cloud Gateway)&lt;hr&gt;&lt;i&gt;&lt;b&gt;[Pattern: API Gateway]&lt;/b&gt;&lt;/i&gt;&lt;br&gt;&amp;bull; Routing Request&lt;br&gt;&amp;bull; Validate JWT Signature" vertex="1">
+          <mxGeometry height="100" width="220" x="500" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="identity_group" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Identity Service (Port 8081)" vertex="1">
+          <mxGeometry height="300" width="280" x="40" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="id_controller" parent="identity_group" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;height=50;fontSize=11;" value="&lt;b&gt;Controller Layer&lt;/b&gt;&lt;br&gt;Endpoint: /api/auth&lt;br&gt;&lt;i&gt;[Pattern: DTO]&lt;/i&gt; Accepts LoginDTO" vertex="1">
+          <mxGeometry height="50" width="280" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="id_security" parent="identity_group" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;html=1;align=center;verticalAlign=middle;fontSize=10;" value="&lt;b&gt;Security Layer (Spring Security)&lt;/b&gt;&lt;br&gt;JWT Provider &amp; Auth Manager" vertex="1">
+          <mxGeometry height="50" width="280" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="id_service" parent="identity_group" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;html=1;align=center;verticalAlign=middle;fontSize=11;" value="&lt;b&gt;Service Layer (Business Logic)&lt;/b&gt;&lt;br&gt;Generate Token, Validate User" vertex="1">
+          <mxGeometry height="50" width="280" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="id_repo" parent="identity_group" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;html=1;align=center;verticalAlign=middle;fontSize=11;" value="&lt;b&gt;Repository Layer (Spring JPA)&lt;/b&gt;&lt;br&gt;Interface UserRepository" vertex="1">
+          <mxGeometry height="50" width="280" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="id_db_conn" parent="identity_group" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;height=70;" value="" vertex="1">
+          <mxGeometry height="70" width="280" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="academic_group" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Academic Service (Port 8082)" vertex="1">
+          <mxGeometry height="300" width="280" x="410" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="ac_controller" parent="academic_group" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;height=50;fontSize=11;" value="&lt;b&gt;Controller Layer&lt;/b&gt;&lt;br&gt;Endpoint: /api/enrollments&lt;br&gt;&lt;i&gt;[Pattern: DTO]&lt;/i&gt; Returns CourseDTO" vertex="1">
+          <mxGeometry height="50" width="280" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ac_service" parent="academic_group" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;html=1;align=center;verticalAlign=middle;fontSize=11;" value="&lt;b&gt;Service Layer&lt;/b&gt;&lt;br&gt;Logic: Check Capacity, Open Class" vertex="1">
+          <mxGeometry height="50" width="280" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ac_feign" parent="academic_group" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;html=1;align=center;verticalAlign=middle;fontSize=10;dashed=1;" value="&lt;b&gt;OpenFeign Client&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Pattern: Circuit Breaker]&lt;/i&gt;&lt;br&gt;Sync call to Identity Service" vertex="1">
+          <mxGeometry height="60" width="280" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="ac_repo" parent="academic_group" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;html=1;align=center;verticalAlign=middle;fontSize=11;" value="&lt;b&gt;Repository Layer (Spring JPA)&lt;/b&gt;&lt;br&gt;CourseRepository / ClassRepository" vertex="1">
+          <mxGeometry height="50" width="280" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="ac_db_conn" parent="academic_group" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;height=60;" value="" vertex="1">
+          <mxGeometry height="60" width="280" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="grading_group" parent="1" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Grading Service (Port 8083)" vertex="1">
+          <mxGeometry height="300" width="280" x="780" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="gr_controller" parent="grading_group" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;height=50;fontSize=11;" value="&lt;b&gt;Controller Layer&lt;/b&gt;&lt;br&gt;Endpoint: /api/grades&lt;br&gt;&lt;i&gt;[Pattern: DTO]&lt;/i&gt; Accepts GradeInputDTO" vertex="1">
+          <mxGeometry height="50" width="280" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="gr_service" parent="grading_group" style="rounded=1;fillColor=#ffffff;strokeColor=#000000;html=1;align=center;verticalAlign=middle;fontSize=11;" value="&lt;b&gt;Service Layer&lt;/b&gt;&lt;br&gt;Calc GPA -&gt; Save -&gt; Publish Event" vertex="1">
+          <mxGeometry height="50" width="280" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="gr_repo" parent="grading_group" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;html=1;align=center;verticalAlign=middle;fontSize=11;" value="&lt;b&gt;Repository Layer (Spring JPA)&lt;/b&gt;&lt;br&gt;GradeRepository" vertex="1">
+          <mxGeometry height="50" width="280" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="gr_consumer" parent="grading_group" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;html=1;align=center;verticalAlign=middle;fontSize=11;" value="&lt;b&gt;Event Consumer&lt;/b&gt;&lt;br&gt;Listens to RabbitMQ&lt;br&gt;Saves to Notification Table" vertex="1">
+          <mxGeometry height="60" width="280" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="gr_db_conn" parent="grading_group" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;height=60;" value="" vertex="1">
+          <mxGeometry height="60" width="280" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="db_label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;" value="&lt;b&gt;[Pattern: Database per Service]&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="220" x="440" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="db1" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;" value="DB Identity" vertex="1">
+          <mxGeometry height="60" width="140" x="110" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="db2" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;" value="DB Academic" vertex="1">
+          <mxGeometry height="60" width="140" x="480" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="db3" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;" value="DB Grading" vertex="1">
+          <mxGeometry height="60" width="140" x="850" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="rabbitmq" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;b&gt;RabbitMQ Broker&lt;/b&gt;&lt;br&gt;&lt;i&gt;[Pattern: Event-Driven]&lt;/i&gt;" vertex="1">
+          <mxGeometry height="80" width="120" x="1080" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="c_g" edge="1" parent="1" source="client" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;strokeWidth=2;" target="gateway">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g_s1" edge="1" parent="1" source="gateway" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;" target="identity_group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g_s2" edge="1" parent="1" source="gateway" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;" target="academic_group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="g_s3" edge="1" parent="1" source="gateway" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;" target="grading_group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r_d1" edge="1" parent="1" source="id_repo" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="db1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r_d2" edge="1" parent="1" source="ac_repo" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="db2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r_d3" edge="1" parent="1" source="gr_repo" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="db3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="feign_call" edge="1" parent="1" source="ac_feign" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;dashed=1;strokeColor=#0000FF;strokeWidth=2;" target="id_controller">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="540" />
+              <mxPoint x="360" y="435" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pub" edge="1" parent="1" source="gr_service" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#FF0000;strokeWidth=2;entryX=0.535;entryY=0.019;entryDx=0;entryDy=0;entryPerimeter=0;" target="rabbitmq">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1144" y="485" />
+              <mxPoint x="1144" y="502" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sub" edge="1" parent="1" source="rabbitmq" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#FF0000;strokeWidth=2;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="gr_consumer">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1140" y="590" />
+            </Array>
+            <mxPoint x="1170" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
