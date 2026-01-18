@@ -6,16 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Edit,
-  Trash2,
-  ArrowLeft,
-  Download,
-  FileText,
-  Upload,
-  Plus,
-  X,
-} from "lucide-react";
+import { Edit, Trash2, ArrowLeft, Download, FileText, X } from "lucide-react";
 
 interface LectureFile {
   id: string;
@@ -125,7 +116,7 @@ const Lecture = () => {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setFormData({
       ...formData,
@@ -229,7 +220,7 @@ const Lecture = () => {
           <CardTitle>Lecture Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {isEditing ? (
+          {isEditing ?
             <>
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
@@ -297,8 +288,7 @@ const Lecture = () => {
                 )}
               </div>
             </>
-          ) : (
-            <>
+          : <>
               <div>
                 <p className="text-sm text-muted-foreground">Title</p>
                 <p className="font-medium">{lecture.title}</p>
@@ -350,14 +340,14 @@ const Lecture = () => {
                           minute: "2-digit",
                           second: "2-digit",
                           hour12: false,
-                        }
+                        },
                       )}
                     </p>
                   </div>
                 )}
               </div>
             </>
-          )}
+          }
         </CardContent>
       </Card>
 
@@ -367,7 +357,7 @@ const Lecture = () => {
           <CardTitle>Lecture Files ({lecture.fileCount})</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {lecture.files && lecture.files.length > 0 ? (
+          {lecture.files && lecture.files.length > 0 ?
             lecture.files.map((file) => (
               <div
                 key={file.id}
@@ -402,11 +392,10 @@ const Lecture = () => {
                 </div>
               </div>
             ))
-          ) : (
-            <p className="text-center text-muted-foreground py-4">
+          : <p className="text-center text-muted-foreground py-4">
               No files uploaded yet
             </p>
-          )}
+          }
         </CardContent>
       </Card>
 
@@ -415,15 +404,14 @@ const Lecture = () => {
         <div></div>
         {isTeacher && (
           <div className="flex gap-2">
-            {isEditing ? (
+            {isEditing ?
               <>
                 <Button variant="outline" onClick={handleCancel}>
                   Cancel
                 </Button>
                 <Button onClick={handleEdit}>Save Changes</Button>
               </>
-            ) : (
-              <>
+            : <>
                 <Button variant="outline" onClick={handleEdit}>
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Info
@@ -433,7 +421,7 @@ const Lecture = () => {
                   Delete Lecture
                 </Button>
               </>
-            )}
+            }
           </div>
         )}
       </div>

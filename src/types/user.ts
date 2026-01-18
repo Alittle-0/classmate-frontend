@@ -1,5 +1,6 @@
 export interface User {
   id: string;
+  _id?: string; // MongoDB ObjectId (for backward compatibility)
   email: string;
   avatarUrl?: string;
   firstname: string;

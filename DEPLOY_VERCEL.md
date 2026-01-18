@@ -217,7 +217,7 @@ npm run build
 **Giải pháp:**
 
 1. Kiểm tra `VITE_API_URL` đã được set đúng
-2. Cấu hình CORS ở backend cho phép domain Vercel
+2. Cấu hình CORS ở backend cho phép domain Vercel (xem phần **Cấu hình CORS và Cookie** bên dưới)
 
 ### Lỗi 4: Module not found
 
@@ -256,7 +256,88 @@ npm install
 
 ---
 
-## 🔗 Cấu Hình Domain Tùy Chỉnh (Tùy chọn)
+## � Cấu Hình CORS và Cookie (Quan trọng!)
+
+Khi deploy frontend và backend trên **2 domain khác nhau** (ví dụ: `frontend.vercel.app` và `api.backend.com`) và sử dụng **HTTPS**, cần cấu hình đúng để cookie hoạt động.
+
+### So sánh Development vs Production:
+
+| Môi trường                          | SameSite | Secure  | Ghi chú                 |
+| ----------------------------------- | -------- | ------- | ----------------------- |
+| **Development** (localhost)         | `Lax`    | `false` | Cùng site, HTTP ok      |
+| **Production** (cross-domain HTTPS) | `None`   | `true`  | Bắt buộc cho cross-site |
+
+### Cấu hình Backend (API Gateway):
+
+```java
+// Spring Boot example - CORS Configuration
+@Configuration
+public class CorsConfig {
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration config = new CorsConfiguration();
+
+        // Cho phép domain frontend
+        config.addAllowedOrigin("https://your-frontend.vercel.app");
+
+        // Cho phép credentials (cookies)
+        config.setAllowCredentials(true);
+
+        // Cho phép các headers cần thiết
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        return new CorsFilter(source);
+    }
+}
+```
+
+### Cấu hình Cookie ở Backend:
+
+```java
+// Khi set cookie (ví dụ refresh token)
+ResponseCookie cookie = ResponseCookie.from("refreshToken", token)
+    .httpOnly(true)
+    .secure(true)           // ⚠️ BẮT BUỘC cho HTTPS
+    .sameSite("None")       // ⚠️ BẮT BUỘC cho cross-domain
+    .path("/")
+    .maxAge(7 * 24 * 60 * 60) // 7 days
+    .build();
+```
+
+### Headers CORS bắt buộc:
+
+| Header                             | Giá trị                                  | Bắt buộc                               |
+| ---------------------------------- | ---------------------------------------- | -------------------------------------- |
+| `Access-Control-Allow-Origin`      | `https://your-frontend.vercel.app`       | ✅ (không dùng `*` khi có credentials) |
+| `Access-Control-Allow-Credentials` | `true`                                   | ✅                                     |
+| `Access-Control-Allow-Headers`     | `Content-Type, Authorization`            | ✅                                     |
+| `Access-Control-Allow-Methods`     | `GET, POST, PUT, PATCH, DELETE, OPTIONS` | ✅                                     |
+
+### Frontend đã được cấu hình:
+
+File `src/lib/axios.ts` đã có `withCredentials: true`:
+
+```typescript
+const api = axios.create({
+  baseURL: getBaseURL(),
+  withCredentials: true, // ✅ Đã có sẵn
+});
+```
+
+### ⚠️ Lưu ý quan trọng:
+
+1. **KHÔNG thể dùng `Access-Control-Allow-Origin: *`** khi có `credentials: true`
+2. Phải list chính xác domain frontend
+3. Cookie **SameSite=None** **BẮT BUỘC** phải đi kèm **Secure=true**
+4. **Secure=true** chỉ hoạt động trên **HTTPS**
+
+---
+
+## �🔗 Cấu Hình Domain Tùy Chỉnh (Tùy chọn)
 
 ### Thêm custom domain:
 

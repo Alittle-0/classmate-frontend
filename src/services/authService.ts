@@ -1,5 +1,4 @@
 import api from "@/lib/axios";
-import { codec } from "zod";
 
 export const authService = {
   signUp: async (

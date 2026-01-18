@@ -44,9 +44,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       toast.success("Create successfully! Navigate to login page.");
       return true;
-    } catch (error) {
-      console.error(error.response.data.message);
-      toast.error("Error when creating: " + error.response.data.message);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      console.error(err.response?.data?.message);
+      toast.error(
+        "Error when creating: " +
+          (err.response?.data?.message || "Unknown error"),
+      );
       return false;
     } finally {
       set({ loading: false });
@@ -64,9 +68,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       toast.success("Welcome to ClassMate!");
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error("Error when logging in: " + error.response.data.message);
+      const err = error as { response?: { data?: { message?: string } } };
+      toast.error(
+        "Error when logging in: " +
+          (err.response?.data?.message || "Unknown error"),
+      );
       return false;
     } finally {
       set({ loading: false });
@@ -461,7 +469,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  updateLecture: async (lectureId, data) => {
+  updateLecture: async (
+    lectureId: string,
+    data: { title?: string; description?: string },
+  ) => {
     try {
       set({ pageLoading: true });
       await authService.updateLecture(lectureId, data);
@@ -476,7 +487,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  addFilesToLecture: async (lectureId, formData) => {
+  addFilesToLecture: async (lectureId: string, formData: FormData) => {
     try {
       set({ pageLoading: true });
       await authService.addFilesToLecture(lectureId, formData);
@@ -491,7 +502,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  deleteLectureFile: async (lectureId, fileId) => {
+  deleteLectureFile: async (lectureId: string, fileId: string) => {
     try {
       set({ pageLoading: true });
       await authService.deleteLectureFile(lectureId, fileId);

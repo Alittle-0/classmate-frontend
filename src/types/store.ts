@@ -95,7 +95,17 @@ export interface AuthState {
 
   downloadLectureFile: (lectureId: string, fileName: string) => Promise<void>;
 
-  updateLecture: (lectureId: string, formData: FormData) => Promise<boolean>;
+  updateLecture: (
+    lectureId: string,
+    data: { title?: string; description?: string },
+  ) => Promise<boolean>;
+
+  addFilesToLecture: (
+    lectureId: string,
+    formData: FormData,
+  ) => Promise<boolean>;
+
+  deleteLectureFile: (lectureId: string, fileId: string) => Promise<boolean>;
 
   deleteLecture: (lectureId: string) => Promise<boolean>;
 

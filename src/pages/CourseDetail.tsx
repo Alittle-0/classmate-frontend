@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useNavigationStore, toSlug } from "@/stores/useNavigationStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { getProfileUrl } from "@/lib/utils";
 import {
