@@ -1,13 +1,16 @@
 import { useAuthStore } from "@/stores/useAuthStore";
 import axios from "axios";
-import { useState } from "react";
-import { config } from "zod";
+
+const getBaseURL = () => {
+  if (import.meta.env.MODE === "development") {
+    return import.meta.env.VITE_DEV_URL || "/api";
+  }
+  // Production: use environment variable or fallback to /api
+  return import.meta.env.VITE_API_URL || "/api";
+};
 
 const api = axios.create({
-  baseURL:
-    import.meta.env.MODE == "development"
-      ? import.meta.env.VITE_DEV_URL
-      : "/api",
+  baseURL: getBaseURL(),
   withCredentials: true,
 });
 
@@ -21,7 +24,7 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 api.interceptors.response.use(
@@ -44,7 +47,7 @@ api.interceptors.response.use(
         const response = await api.post(
           "/v1/identity/auth/refresh",
           {},
-          { withCredentials: true }
+          { withCredentials: true },
         );
         const newAccessToken = response.data.access_token;
 
@@ -60,7 +63,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;
