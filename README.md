@@ -1,73 +1,100 @@
-# React + TypeScript + Vite
+# ClassMate - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend application for the School Management System, built with **React**, **TypeScript**, and **Vite**. It features a modern, responsive UI using **Tailwind CSS** and **shadcn/ui**.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+*   **Authentication:** Secure Login & Sign Up with JWT integration.
+*   **Dashboard:** Overview of user activities.
+*   **Course Management:**
+    *   View joined/created courses.
+    *   Create new courses (Teacher).
+    *   Join courses via invite code (Student).
+*   **Classroom Interface:**
+    *   Detailed course view.
+    *   Assignment listing and submission.
+    *   Lecture material access.
+*   **Profile:** Manage user profile and passwords.
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+*   **Framework:** React 19 + Vite
+*   **Language:** TypeScript
+*   **Styling:** Tailwind CSS 4
+*   **UI Components:** shadcn/ui, Radix UI
+*   **State Management:** Zustand
+*   **Form Handling:** React Hook Form + Zod
+*   **Routing:** React Router 7
+*   **HTTP Client:** Axios
 
-## Expanding the ESLint configuration
+## 🚀 Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
+*   Node.js (v18 or higher)
+*   npm
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Installation
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1.  **Clone the repository** and navigate to the frontend directory:
+    ```bash
+    cd frontend
+    ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Configure Environment:**
+    Create a `.env` file in the root directory (copy from `.env.example`):
+    ```bash
+    cp .env.example .env
+    ```
+    Ensure the API URL points to your running Backend API Gateway:
+    ```env
+    VITE_DEV_URL=http://localhost:8080/api
+    VITE_API_URL=http://localhost:8080/api
+    ```
+
+4.  **Run Development Server:**
+    ```bash
+    npm run dev
+    ```
+    Access the app at [http://localhost:5173](http://localhost:5173).
+
+## 🏗️ Build & Deploy
+
+To build the application for production:
+
+```bash
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The build artifacts will be stored in the `dist/` directory.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Deployment (Vercel)
+This project is configured for easy deployment on Vercel.
+1.  Import project to Vercel.
+2.  Set the `VITE_API_URL` environment variable to your production backend URL.
+3.  Deploy.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+*See `DEPLOY_VERCEL.md` for detailed deployment instructions.*
+
+## 📂 Project Structure
+
 ```
+src/
+├── components/     # Reusable UI components
+├── hooks/          # Custom React hooks
+├── lib/            # Utilities (axios, cn, etc.)
+├── pages/          # Page components (Login, Dashboard, CourseDetail...)
+├── services/       # API service calls
+├── stores/         # Global state (Zustand)
+└── types/          # TypeScript type definitions
+```
+
+## 🔒 Authentication Flow
+
+The frontend handles authentication using **Access Tokens** (memory) and **Refresh Tokens** (HTTP-only cookies).
+*   **Axios Interceptor:** Automatically attaches the Access Token to requests and handles 401/403 errors by attempting to refresh the token transparently.
+*   **Protected Routes:** Ensures only authenticated users can access dashboard and course pages.
