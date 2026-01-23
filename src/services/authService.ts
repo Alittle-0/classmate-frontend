@@ -338,4 +338,18 @@ export const authService = {
       withCredentials: true,
     });
   },
+
+  gradeSubmission: async (
+    submissionId: string,
+    data: { grade?: number; feedback?: string },
+  ) => {
+    const response = await api.patch(
+      `/v1/grading/assignments/submissions/${submissionId}/grade`,
+      data,
+      {
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  },
 };

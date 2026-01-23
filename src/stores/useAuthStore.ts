@@ -580,4 +580,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ pageLoading: false });
     }
   },
+
+  gradeSubmission: async (submissionId, data) => {
+    try {
+      set({ pageLoading: true });
+      await authService.gradeSubmission(submissionId, data);
+      toast.success("Submission graded successfully!");
+      return true;
+    } catch (error: any) {
+      console.error(error);
+      const message =
+        error.response?.data?.message || "Failed to grade submission";
+      toast.error(message);
+      return false;
+    } finally {
+      set({ pageLoading: false });
+    }
+  },
 }));

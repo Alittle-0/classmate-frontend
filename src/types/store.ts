@@ -115,4 +115,9 @@ export interface AuthState {
   downloadSubmission: (submissionId: string, fileName: string) => Promise<void>;
 
   deleteSubmission: (submissionId: string) => Promise<boolean>;
+
+  gradeSubmission: (
+    submissionId: string,
+    data: { grade?: number; feedback?: string },
+  ) => Promise<boolean>;
 }

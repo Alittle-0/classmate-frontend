@@ -54,6 +54,8 @@ interface CourseDetailData {
   course_description: string;
   course_invited_code: string;
   members: any[];
+  assignments: any[];
+  lectures: any[];
   created_date: string;
   last_modified_date: string;
 }
@@ -67,9 +69,7 @@ const CourseDetail = () => {
     updateCourse,
     leaveCourse,
     deleteCourse,
-    getAssignmentsByCourseId,
     createAssignment,
-    getLecturesByCourseId,
     uploadLecture,
   } = useAuthStore();
   const {
@@ -79,8 +79,6 @@ const CourseDetail = () => {
     setLectureContext,
   } = useNavigationStore();
   const [course, setCourse] = useState<CourseDetailData | null>(null);
-  const [assignments, setAssignments] = useState<any[]>([]);
-  const [lectures, setLectures] = useState<any[]>([]);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [createLectureOpen, setCreateLectureOpen] = useState(false);
@@ -106,8 +104,6 @@ const CourseDetail = () => {
 
   useEffect(() => {
     loadCourseDetail();
-    loadAssignments();
-    loadLectures();
   }, [courseId, courseSlug]);
 
   const loadCourseDetail = async () => {
@@ -122,18 +118,6 @@ const CourseDetail = () => {
       // Update context with course name
       setCourseContext(data.course_id, data.course_name);
     }
-  };
-
-  const loadAssignments = async () => {
-    if (!courseId) return;
-    const data = await getAssignmentsByCourseId(courseId);
-    setAssignments(data || []);
-  };
-
-  const loadLectures = async () => {
-    if (!courseId) return;
-    const data = await getLecturesByCourseId(courseId);
-    setLectures(data || []);
   };
 
   const handleEdit = async () => {
@@ -213,7 +197,7 @@ const CourseDetail = () => {
       });
       setDueDate(undefined);
       setDueTime("10:30:00");
-      await loadAssignments();
+      await loadCourseDetail();
     }
   };
 
@@ -262,6 +246,7 @@ const CourseDetail = () => {
     lectureFiles.forEach((file) => {
       formDataToSend.append("files", file);
     });
+    console.log(formDataToSend)
 
     const success = await uploadLecture(courseId, formDataToSend);
 
@@ -272,7 +257,7 @@ const CourseDetail = () => {
         description: "",
       });
       setLectureFiles([]);
-      await loadLectures();
+      await loadCourseDetail();
     }
   };
 
@@ -754,11 +739,11 @@ const CourseDetail = () => {
       {/* Lectures List */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold">
-          Lectures ({lectures.length || 0})
+          Lectures ({course.lectures?.length || 0})
         </h2>
-        {lectures.length > 0 ?
+        {course.lectures && course.lectures.length > 0 ?
           <div className="space-y-3">
-            {lectures.map((lecture: any) => (
+            {course.lectures.map((lecture: any) => (
               <div
                 key={lecture.id}
                 className="flex items-start gap-4 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
@@ -787,11 +772,11 @@ const CourseDetail = () => {
       {/* Assignments List */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold">
-          Assignments ({assignments.length || 0})
+          Assignments ({course.assignments?.length || 0})
         </h2>
-        {assignments.length > 0 ?
+        {course.assignments && course.assignments.length > 0 ?
           <div className="space-y-3">
-            {assignments.map((assignment: any) => (
+            {course.assignments.map((assignment: any) => (
               <div
                 key={assignment.assignment_id}
                 className="flex items-start gap-4 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"

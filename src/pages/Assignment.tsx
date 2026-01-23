@@ -20,6 +20,8 @@ import {
   CheckCircle,
   AlertTriangle,
   XCircle,
+  MoreVertical,
+  Star,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -27,6 +29,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 interface Submission {
   id: string;
@@ -62,6 +79,7 @@ const Assignment = () => {
     submitAssignment,
     downloadSubmission,
     deleteSubmission,
+    gradeSubmission,
     user,
   } = useAuthStore();
 
@@ -77,6 +95,16 @@ const Assignment = () => {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Grading Dialog State
+  const [gradeDialogOpen, setGradeDialogOpen] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(
+    null,
+  );
+  const [gradeData, setGradeData] = useState<{
+    grade: string;
+    feedback: string;
+  }>({ grade: "", feedback: "" });
 
   const loadAssignmentDetail = async () => {
     if (!assignmentId) return;
@@ -113,24 +141,18 @@ const Assignment = () => {
   const isTeacher = useMemo(() => {
     if (!user) return false;
     const fullName = user.firstname + " " + user.lastname;
+    const teacher_name =
+      course?.teacher_firstname + " " + course?.teacher_lastname;
 
     // Check from course data
     if (course) {
-      if (
-        fullName === course.teacher_name ||
-        fullName === course.sub_teacher_name
-      ) {
+      if (fullName === teacher_name || fullName === course.sub_teacher_name) {
         return true;
       }
     }
 
     // Fallback: check if user created the assignment
     if (assignment && assignment.create_by === user._id) {
-      return true;
-    }
-
-    // Also check user role
-    if (user.role === "TEACHER") {
       return true;
     }
 
@@ -274,6 +296,7 @@ const Assignment = () => {
     setIsSubmitting(true);
     const formDataToSend = new FormData();
     formDataToSend.append("file", selectedFile);
+    //console.log(formDataToSend)
 
     const result = await submitAssignment(assignmentId, formDataToSend);
     setIsSubmitting(false);
@@ -314,6 +337,47 @@ const Assignment = () => {
     }
   };
 
+  // Grade Handling
+  const handleOpenGradeDialog = (submission: Submission) => {
+    // Check if assignment deadline has passed
+    if (!deadlineInfo.isPastDeadline) {
+      toast.error("Cannot grade assignment before submission deadline");
+      return;
+    }
+
+    setSelectedSubmission(submission);
+    setGradeData({
+      grade: submission.grade ? submission.grade.toString() : "",
+      feedback: submission.feedback || "",
+    });
+    setGradeDialogOpen(true);
+  };
+
+  const handleGradeSubmit = async () => {
+    if (!selectedSubmission) return;
+
+    const gradeVal = parseFloat(gradeData.grade);
+    if (isNaN(gradeVal) || gradeVal < 0 || gradeVal > 10) {
+      toast.error("Grade must be between 0.0 and 10.0");
+      return;
+    }
+    if (gradeData.feedback && (gradeData.feedback.length < 10 || gradeData.feedback.length > 255)) {
+        toast.error("Feedback must be between 10 and 1000 characters");
+        return;
+    }
+
+    const success = await gradeSubmission(selectedSubmission.id, {
+      grade: gradeVal,
+      feedback: gradeData.feedback || undefined,
+    });
+
+    if (success) {
+      setGradeDialogOpen(false);
+      setSelectedSubmission(null);
+      await loadAssignmentDetail();
+    }
+  };
+
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return bytes + " B";
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
@@ -321,19 +385,19 @@ const Assignment = () => {
   };
 
   const getStatusBadge = (status: string, isLate?: boolean) => {
-    if (status === "LATE" || isLate) {
-      return (
-        <Badge variant="destructive" className="flex items-center gap-1">
-          <AlertTriangle className="h-3 w-3" />
-          Late
-        </Badge>
-      );
-    }
     if (status === "GRADED") {
       return (
         <Badge variant="default" className="flex items-center gap-1">
           <CheckCircle className="h-3 w-3" />
           Graded
+        </Badge>
+      );
+    }
+    if (status === "LATE" || isLate) {
+      return (
+        <Badge variant="destructive" className="flex items-center gap-1">
+          <AlertTriangle className="h-3 w-3" />
+          Late
         </Badge>
       );
     }
@@ -534,23 +598,20 @@ const Assignment = () => {
             <CardTitle>Your Submission</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {
-              mySubmissionInfo ?
-                // Show existing submission
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <FileText className="h-8 w-8 text-primary" />
-                      <div>
-                        <p className="font-medium">
-                          {mySubmissionInfo.fileName}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {formatFileSize(mySubmissionInfo.fileSize)} •
-                          Submitted at{" "}
-                          {new Date(
-                            mySubmissionInfo.submittedDate,
-                          ).toLocaleString("en-GB", {
+            {mySubmissionInfo ?
+              // Show existing submission
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-8 w-8 text-primary" />
+                    <div>
+                      <p className="font-medium">{mySubmissionInfo.fileName}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatFileSize(mySubmissionInfo.fileSize)} • Submitted
+                        at{" "}
+                        {new Date(mySubmissionInfo.submittedDate).toLocaleString(
+                          "en-GB",
+                          {
                             year: "numeric",
                             month: "2-digit",
                             day: "2-digit",
@@ -558,161 +619,177 @@ const Assignment = () => {
                             minute: "2-digit",
                             second: "2-digit",
                             hour12: false,
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getStatusBadge(
-                        mySubmissionInfo.status,
-                        mySubmissionInfo.isLate,
-                      )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handleDownloadSubmission(mySubmissionInfo)
-                        }
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handleDeleteSubmission(mySubmissionInfo.id)
-                        }
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                          },
+                        )}
+                      </p>
                     </div>
                   </div>
-
-                  {/* Time diff info */}
-                  {mySubmissionInfo.timeDiffString && (
-                    <div
-                      className={`text-sm p-2 rounded ${
-                        mySubmissionInfo.isLate ?
-                          "bg-destructive/10 text-destructive"
-                        : "bg-green-500/10 text-green-600"
-                      }`}
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(
+                      mySubmissionInfo.status,
+                      mySubmissionInfo.isLate,
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownloadSubmission(mySubmissionInfo)}
                     >
-                      {mySubmissionInfo.isLate ?
-                        `⚠️ Submitted late by ${mySubmissionInfo.timeDiffString}`
-                      : `✓ Submitted early by ${mySubmissionInfo.timeDiffString}`
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        handleDeleteSubmission(mySubmissionInfo.id)
                       }
-                    </div>
-                  )}
-
-                  {/* Allow resubmit if not past deadline */}
-                  {!deadlineInfo.isPastDeadline && (
-                    <div className="border-t pt-4">
-                      <p className="text-sm text-muted-foreground mb-3">
-                        You can replace your submission with a different file:
-                      </p>
-                      <div>
-                        <Label
-                          htmlFor="file-reupload"
-                          className="cursor-pointer"
-                        >
-                          <div className="border-2 border-dashed rounded-lg p-4 hover:bg-muted/50 transition-colors text-center">
-                            <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
-                            <p className="text-sm font-medium">
-                              Click to select a replacement file
-                            </p>
-                          </div>
-                          <Input
-                            id="file-reupload"
-                            type="file"
-                            onChange={handleFileSelect}
-                            className="hidden"
-                          />
-                        </Label>
-                      </div>
-                      {selectedFile && (
-                        <div className="mt-3 space-y-2">
-                          <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                            <span className="text-sm truncate">
-                              {selectedFile.name}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleRemoveFile}
-                            >
-                              Cancel
-                            </Button>
-                          </div>
-                          <Button
-                            className="w-full"
-                            onClick={handleSubmitAssignment}
-                            disabled={isSubmitting}
-                          >
-                            {isSubmitting ? "Submitting..." : "Resubmit"}
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
-                // Show upload area
-              : <>
-                  {deadlineInfo.isPastDeadline ?
-                    <div className="text-center py-8 text-muted-foreground">
-                      <XCircle className="h-12 w-12 mx-auto mb-3 text-destructive" />
-                      <p className="font-medium">Deadline Passed</p>
-                      <p className="text-sm">
-                        You cannot submit after the deadline
-                      </p>
+
+                {/* Show Grade and Feedback for Student */}
+                {mySubmissionInfo.status === "GRADED" && (
+                  <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-lg flex items-center gap-2">
+                        <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                        Grade: {mySubmissionInfo.grade}/10
+                      </h3>
                     </div>
-                  : <>
+                    {mySubmissionInfo.feedback && (
                       <div>
-                        <Label htmlFor="file-upload" className="cursor-pointer">
-                          <div className="border-2 border-dashed rounded-lg p-6 hover:bg-muted/50 transition-colors text-center">
-                            <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                            <p className="text-sm font-medium">
-                              Click to select a file to submit
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              or drag and drop files here
-                            </p>
-                          </div>
-                          <Input
-                            id="file-upload"
-                            type="file"
-                            onChange={handleFileSelect}
-                            className="hidden"
-                          />
-                        </Label>
+                        <p className="text-sm font-medium text-muted-foreground mb-1">Feedback:</p>
+                        <p className="text-sm whitespace-pre-wrap">{mySubmissionInfo.feedback}</p>
                       </div>
-                      {selectedFile && (
-                        <div className="space-y-2">
-                          <p className="text-sm font-medium">Selected file:</p>
-                          <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                            <span className="text-sm truncate">
-                              {selectedFile.name}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleRemoveFile}
-                            >
-                              Remove
-                            </Button>
-                          </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Time diff info */}
+                {mySubmissionInfo.timeDiffString && (
+                  <div
+                    className={`text-sm p-2 rounded ${
+                      mySubmissionInfo.isLate ?
+                        "bg-destructive/10 text-destructive"
+                      : "bg-green-500/10 text-green-600"
+                    }`}
+                  >
+                    {mySubmissionInfo.isLate ?
+                      `⚠️ Submitted late by ${mySubmissionInfo.timeDiffString}`
+                    : `✓ Submitted early by ${mySubmissionInfo.timeDiffString}`
+                    }
+                  </div>
+                )}
+
+                {/* Allow resubmit if not past deadline */}
+                {!deadlineInfo.isPastDeadline && (
+                  <div className="border-t pt-4">
+                    <p className="text-sm text-muted-foreground mb-3">
+                      You can replace your submission with a different file:
+                    </p>
+                    <div>
+                      <Label
+                        htmlFor="file-reupload"
+                        className="cursor-pointer"
+                      >
+                        <div className="border-2 border-dashed rounded-lg p-4 hover:bg-muted/50 transition-colors text-center">
+                          <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                          <p className="text-sm font-medium">
+                            Click to select a replacement file
+                          </p>
+                        </div>
+                        <Input
+                          id="file-reupload"
+                          type="file"
+                          onChange={handleFileSelect}
+                          className="hidden"
+                        />
+                      </Label>
+                    </div>
+                    {selectedFile && (
+                      <div className="mt-3 space-y-2">
+                        <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                          <span className="text-sm truncate">
+                            {selectedFile.name}
+                          </span>
                           <Button
-                            className="w-full mt-4"
-                            onClick={handleSubmitAssignment}
-                            disabled={isSubmitting}
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRemoveFile}
                           >
-                            {isSubmitting ? "Submitting..." : "Submit"}
+                            Cancel
                           </Button>
                         </div>
-                      )}
-                    </>
-                  }
-                </>
-
+                        <Button
+                          className="w-full"
+                          onClick={handleSubmitAssignment}
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? "Submitting..." : "Resubmit"}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            : // Show upload area
+              <>
+                {deadlineInfo.isPastDeadline ?
+                  <div className="text-center py-8 text-muted-foreground">
+                    <XCircle className="h-12 w-12 mx-auto mb-3 text-destructive" />
+                    <p className="font-medium">Deadline Passed</p>
+                    <p className="text-sm">
+                      You cannot submit after the deadline
+                    </p>
+                  </div>
+                : <>
+                    <div>
+                      <Label htmlFor="file-upload" className="cursor-pointer">
+                        <div className="border-2 border-dashed rounded-lg p-6 hover:bg-muted/50 transition-colors text-center">
+                          <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                          <p className="text-sm font-medium">
+                            Click to select a file to submit
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            or drag and drop files here
+                          </p>
+                        </div>
+                        <Input
+                          id="file-upload"
+                          type="file"
+                          onChange={handleFileSelect}
+                          className="hidden"
+                        />
+                      </Label>
+                    </div>
+                    {selectedFile && (
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Selected file:</p>
+                        <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                          <span className="text-sm truncate">
+                            {selectedFile.name}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRemoveFile}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                        <Button
+                          className="w-full mt-4"
+                          onClick={handleSubmitAssignment}
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? "Submitting..." : "Submit"}
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                }
+              </>
             }
           </CardContent>
         </Card>
@@ -749,39 +826,68 @@ const Assignment = () => {
                           {submission.fileName} •{" "}
                           {formatFileSize(submission.fileSize)}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          Submitted at:{" "}
-                          {new Date(submission.submittedDate).toLocaleString(
-                            "en-GB",
-                            {
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              second: "2-digit",
-                              hour12: false,
-                            },
+                        <div className="text-xs text-muted-foreground">
+                          <p>
+                            Submitted:{" "}
+                            {new Date(submission.submittedDate).toLocaleString(
+                              "en-GB",
+                              {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                                hour12: false,
+                              },
+                            )}
+                          </p>
+                          {submission.grade !== undefined && (
+                            <>
+                            <p>
+                              • Grade: {submission.grade}
+                            </p>
+                            <p>
+                              • Feedback: {submission.feedback}
+                            </p>
+                            </>
                           )}
-                        </p>
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       {getStatusBadge(submission.status)}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownloadSubmission(submission)}
-                      >
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteSubmission(submission.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleDownloadSubmission(submission)}
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            Download
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleOpenGradeDialog(submission)}
+                            disabled={!deadlineInfo.isPastDeadline}
+                          >
+                            <Star className="mr-2 h-4 w-4" />
+                            Grade / Feedback
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleDeleteSubmission(submission.id)
+                            }
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 ))}
@@ -793,6 +899,60 @@ const Assignment = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Grade Dialog */}
+      <Dialog open={gradeDialogOpen} onOpenChange={setGradeDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Grade Submission</DialogTitle>
+            <DialogDescription>
+              Enter grade and feedback for{" "}
+              {selectedSubmission?.firstname} {selectedSubmission?.lastname}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="grade">Grade (0.0 - 10.0)</Label>
+              <Input
+                id="grade"
+                type="number"
+                min="0"
+                max="10"
+                step="0.1"
+                value={gradeData.grade}
+                onChange={(e) =>
+                  setGradeData({ ...gradeData, grade: e.target.value })
+                }
+                placeholder="Enter grade"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="feedback">Feedback (Optional)</Label>
+              <textarea
+                id="feedback"
+                value={gradeData.feedback}
+                onChange={(e) =>
+                  setGradeData({ ...gradeData, feedback: e.target.value })
+                }
+                placeholder="Enter feedback for the student"
+                className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                Feedback must be between 10 and 255 characters if provided.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setGradeDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleGradeSubmit}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {isTeacher && (
         <div className="flex items-center justify-between">

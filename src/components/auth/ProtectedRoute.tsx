@@ -2,6 +2,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const ProtectedRoute = () => {
   const { accessToken, user, loading, refresh, fetchMe, pageLoading } =
@@ -21,6 +22,16 @@ const ProtectedRoute = () => {
   useEffect(() => {
     init();
   }, []);
+
+  // Client-side validation for inactive users
+  // If user is logged in but inactive, restrict them to Profile page (which uses identity-service)
+  if (accessToken && user && user.isActive === false) {
+    const currentPath = window.location.pathname;
+    if (!currentPath.startsWith("/profile")) {
+      toast.error("Reactive to use this feature")
+      return <Navigate to="/profile" replace />;
+    }
+  }
 
   // if (starting || loading) {
   //   return (

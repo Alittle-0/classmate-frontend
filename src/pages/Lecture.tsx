@@ -174,9 +174,12 @@ const Lecture = () => {
     }
   };
 
+  const fullName = `${user?.firstname} ${user?.lastname}`;
+  const teacher_name = `${course?.teacher_firstname} ${course?.teacher_lastname}`;
+
   const isTeacher =
-    user?.firstname + " " + user?.lastname === course?.teacher_name ||
-    user?.firstname + " " + user?.lastname === course?.sub_teacher_name;
+    fullName === teacher_name || fullName === course?.sub_teacher_name;
+
 
   if (!lecture) {
     return (
